@@ -1,20 +1,91 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8" />
-    <title>Redirecting...</title>
+<head>
+    <title>Promise Keeper OAuth Redirect</title>
     <script>
-      const params = new URLSearchParams(window.location.search);
-      const code = params.get("code");
-      const state = params.get("state");
-      if (code) {
-        window.location.href = `promisekeeper://oauth-callback?code=${code}&state=${state}`;
-      } else {
-        document.body.innerText = "Authorization failed or cancelled.";
-      }
+        // Function to extract query parameters
+        function getQueryParam(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+        
+        // Extract the authorization code from the URL
+        const code = getQueryParam('code');
+        const state = getQueryParam('state');
+        
+        // If we have a code, redirect to the app
+        if (code) {
+            // Redirect to your app with the code
+            window.location.href = `promisekeeper://auth/slack?code=${code}`;
+            
+            // Show a message in case the redirect doesn't happen automatically
+            document.addEventListener('DOMContentLoaded', function() {
+                document.getElementById('message').innerHTML = 
+                    'Redirecting to Promise Keeper...<br><br>' +
+                    'If the app doesn\'t open automatically, <a href="promisekeeper://auth/slack?code=' + 
+                    code + '">click here</a>.';
+            });
+        } else {
+            // Show an error if no code was found
+            document.addEventListener('DOMContentLoaded', function() {
+                document.getElementById('message').innerHTML = 
+                    'Authentication failed. No authorization code was received.<br><br>' +
+                    'Please try again in the Promise Keeper app.';
+                document.getElementById('container').classList.add('error');
+            });
+        }
     </script>
-  </head>
-  <body>
-    Redirecting...
-  </body>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f5f5f7;
+            color: #1d1d1f;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        .container {
+            max-width: 600px;
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            color: #34c759; /* Success green */
+        }
+        .container.error .icon {
+            color: #ff3b30; /* Error red */
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        p {
+            font-size: 16px;
+            line-height: 1.5;
+            color: #666;
+        }
+        a {
+            color: #0066cc;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div id="container" class="container">
+        <div class="icon">✓</div>
+        <h1>Authentication Successful</h1>
+        <p id="message">Redirecting to Promise Keeper...</p>
+    </div>
+</body>
 </html>
