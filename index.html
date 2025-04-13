@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Redirecting...</title>
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get("code");
+      const state = params.get("state");
+      if (code) {
+        window.location.href = `promisekeeper://oauth-callback?code=${code}&state=${state}`;
+      } else {
+        document.body.innerText = "Authorization failed or cancelled.";
+      }
+    </script>
+  </head>
+  <body>
+    Redirecting...
+  </body>
+</html>
