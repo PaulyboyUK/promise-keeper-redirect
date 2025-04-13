@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Promise Keeper OAuth Redirect</title>
+    <title>Promise Keeper OAuth</title>
     <script>
         // Function to extract query parameters
         function getQueryParam(name) {
@@ -9,31 +9,47 @@
             return urlParams.get(name);
         }
         
-        // Extract the authorization code from the URL
-        const code = getQueryParam('code');
-        const state = getQueryParam('state');
-        
-        // If we have a code, redirect to the app
-        if (code) {
-            // Redirect to your app with the code
-            window.location.href = `promisekeeper://auth/slack?code=${code}`;
+        // Wait for DOM to load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Extract the authorization code from the URL
+            const code = getQueryParam('code');
+            const error = getQueryParam('error');
             
-            // Show a message in case the redirect doesn't happen automatically
-            document.addEventListener('DOMContentLoaded', function() {
+            if (code) {
+                // Show success message
+                document.getElementById('title').textContent = 'Authentication Successful';
                 document.getElementById('message').innerHTML = 
                     'Redirecting to Promise Keeper...<br><br>' +
                     'If the app doesn\'t open automatically, <a href="promisekeeper://auth/slack?code=' + 
                     code + '">click here</a>.';
-            });
-        } else {
-            // Show an error if no code was found
-            document.addEventListener('DOMContentLoaded', function() {
-                document.getElementById('message').innerHTML = 
-                    'Authentication failed. No authorization code was received.<br><br>' +
-                    'Please try again in the Promise Keeper app.';
-                document.getElementById('container').classList.add('error');
-            });
-        }
+                document.getElementById('icon').textContent = '✓';
+                document.getElementById('icon').className = 'icon success';
+                document.getElementById('container').className = 'container success';
+                
+                // Redirect to your app with the code
+                window.location.href = `promisekeeper://auth/slack?code=${code}`;
+            } 
+            else if (error) {
+                // Show error message
+                document.getElementById('title').textContent = 'Authentication Failed';
+                document.getElementById('message').textContent = 
+                    'There was an error during authentication: ' + error + 
+                    '\nPlease try again in the Promise Keeper app.';
+                document.getElementById('icon').textContent = '✗';
+                document.getElementById('icon').className = 'icon error';
+                document.getElementById('container').className = 'container error';
+            }
+            else {
+                // Show direct visit message
+                document.getElementById('title').textContent = 'OAuth Redirect Page';
+                document.getElementById('message').textContent = 
+                    'This page is part of the Promise Keeper authentication process. ' +
+                    'Please return to the app and initiate the Slack connection from there.';
+                document.getElementById('icon').textContent = 'ℹ️';
+                document.getElementById('icon').className = 'icon info';
+                document.getElementById('container').className = 'container info';
+            }
+        });
     </script>
     <style>
         body {
@@ -58,10 +74,15 @@
         .icon {
             font-size: 64px;
             margin-bottom: 20px;
+        }
+        .success {
             color: #34c759; /* Success green */
         }
-        .container.error .icon {
+        .error {
             color: #ff3b30; /* Error red */
+        }
+        .info {
+            color: #007aff; /* Info blue */
         }
         h1 {
             color: #333;
@@ -83,9 +104,9 @@
 </head>
 <body>
     <div id="container" class="container">
-        <div class="icon">✓</div>
-        <h1>Authentication Successful</h1>
-        <p id="message">Redirecting to Promise Keeper...</p>
+        <div id="icon" class="icon">ℹ️</div>
+        <h1 id="title">OAuth Redirect Page</h1>
+        <p id="message">Loading...</p>
     </div>
 </body>
 </html>
