@@ -87,26 +87,28 @@
 
         // Function to determine which service we're authenticating with
         function determineService() {
-            // First check for state parameter - Slack typically uses this
             const state = getQueryParam("state");
-            
-            // If we have a state parameter, it's likely Slack
-            if (state) {
+            if (state === "slack") {
                 return "slack";
             }
-            
-            // Check the referring URL for clues
+            if (state === "basecamp") {
+                return "basecamp";
+            }
+            if (state === "gmail") {
+                return "gmail";
+            }
+
+            // Fallback on referrer
             const referrer = document.referrer;
             if (referrer && referrer.includes("slack.com")) {
                 return "slack";
             }
-            
-            if (referrer && referrer.includes("basecamp.com") || referrer.includes("37signals.com")) {
+            if (referrer && (referrer.includes("basecamp.com") || referrer.includes("37signals.com"))) {
                 return "basecamp";
             }
-            
-            // If we can't determine from the above, use a default
-            return "basecamp"; // Default to basecamp if we can't determine
+
+            // Default fallback
+            return "unknown";
         }
 
         // Main execution starts here
@@ -119,7 +121,7 @@
             console.log("OAuth redirect received for service: " + service);
             console.log("Code parameter: " + (code ? "present" : "missing"));
             
-            if (error || !code) {
+            if (error || !code || service === "unknown") {
                 // Handle error case
                 document.querySelector(".loader").style.display = "none";
                 document.getElementById("errorMessage").style.display = "block";
@@ -127,26 +129,22 @@
                 return;
             }
             
-            // Create the deep link URL based on the service
-            let deepLink = "promisekeeper://auth/" + service + "?code=" + encodeURIComponent(code);
+            // Build the deep link URL back into the app
+            const deepLink = `promisekeeper://auth/${service}?code=${encodeURIComponent(code)}`;
             
-            // Display success message
+            // Show success, then redirect
             document.querySelector(".loader").style.display = "none";
             document.getElementById("successMessage").style.display = "block";
-            
-            // Set up the manual redirect button
             redirectButton.style.display = "block";
             redirectButton.addEventListener("click", function() {
                 window.location.href = deepLink;
             });
             
-            // Try to redirect automatically after a short delay
+            // Attempt automatic redirect
             setTimeout(function() {
                 window.location.href = deepLink;
-                
-                // If we're still here after a second, the redirect may have failed
                 setTimeout(function() {
-                    document.getElementById("redirectButton").innerHTML = "Click to Open Promise Keeper";
+                    redirectButton.textContent = "Click to Open Promise Keeper";
                 }, 1000);
             }, 1500);
         });
