@@ -42,7 +42,7 @@ export async function POST(request: Request) {
     }
 
     // Build the messages for OpenAI
-    const messages = buildChatMessages(body.message, body.previousMessages, body.source);
+    const messages = buildChatMessages(body.message, body.previousMessages);
 
     // Call OpenAI API
     const result = await makeOpenAIRequest(apiKey, messages);
@@ -71,8 +71,7 @@ export async function POST(request: Request) {
 
 function buildChatMessages(
   currentMessage: string,
-  previousMessages?: PromiseDetectionRequest['previousMessages'],
-  source?: string
+  previousMessages?: PromiseDetectionRequest['previousMessages']
 ) {
   const systemPrompt = `You are an AI assistant designed to extract information about promises made in conversations.
   Your primary task is to detect when someone makes a promise or commitment (using phrases like "I will", "I'll", "I can", "sure", "will do", "on it", etc.).
