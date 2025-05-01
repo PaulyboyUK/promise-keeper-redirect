@@ -22,19 +22,6 @@ interface DetectedPromise {
   commitmentText: string;
 }
 
-interface PromiseDetectionResponse {
-  promises: Array<{
-    from: string;
-    text: string;
-    date: string;
-    source: string;
-    isIncomingRequest: boolean;
-    fullText: string;
-    commitmentText: string;
-    avatarURL?: string;
-  }>;
-}
-
 export async function POST(request: Request) {
   try {
     // Get API key from environment variable
@@ -174,7 +161,7 @@ async function makeOpenAIRequest(apiKey: string, messages: Array<{ role: string,
   // Try to parse the JSON response
   try {
     return JSON.parse(content) as { promises: DetectedPromise[] };
-  } catch (error) {
+  } catch {
     // Fallback JSON extraction if the model wrapped the JSON in text
     const extracted = extractJSON(content);
     if (extracted) {

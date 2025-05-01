@@ -20,19 +20,6 @@ interface DetectedPromise {
   commitmentText: string;
 }
 
-interface PromiseDetectionResponse {
-  promises: Array<{
-    from: string;
-    text: string;
-    date: string;
-    source: string;
-    isIncomingRequest: boolean;
-    fullText: string;
-    commitmentText: string;
-    avatarURL?: string;
-  }>;
-}
-
 export async function POST(request: Request) {
   try {
     // Get API key from environment variable
@@ -85,7 +72,7 @@ export async function POST(request: Request) {
 function buildChatMessages(
   currentMessage: string,
   previousMessages?: PromiseDetectionRequest['previousMessages'],
-  source: string = 'slack'
+  source?: string
 ) {
   const systemPrompt = `You are an AI assistant designed to extract information about promises made in conversations.
   Your primary task is to detect when someone makes a promise or commitment (using phrases like "I will", "I'll", "I can", "sure", "will do", "on it", etc.).
@@ -191,7 +178,7 @@ async function makeOpenAIRequest(apiKey: string, messages: Array<{ role: string,
   // Try to parse the JSON response
   try {
     return JSON.parse(content) as { promises: DetectedPromise[] };
-  } catch (error) {
+  } catch {
     // Fallback JSON extraction if the model wrapped the JSON in text
     const extracted = extractJSON(content);
     if (extracted) {
